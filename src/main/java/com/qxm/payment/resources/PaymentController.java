@@ -108,8 +108,9 @@ public class PaymentController {
 	 */
 	@PatchMapping("/{from}/pay/{to}")
 	public ResponseEntity<?> pay(
-	  @RequestBody String amount, @PathVariable("from") Long from, @PathVariable("from") Long to) {
-	     
+	  @RequestBody String amount, @PathVariable("from") Long from, @PathVariable("to") Long to) {
+		logger.info(String.format("payment service topup invoked:%s from:%d ,to:%d amount: %s ", paymentService.getClass().getName(), from, to, amount));
+		
 	    try {
 			paymentService.pay(from, to, amount);
 		} catch (Exception ex) {
