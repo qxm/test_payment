@@ -57,29 +57,38 @@ public class PaymentServiceTest extends TestCase {
     	assertEquals(alice.getId(), alice1.getId());
     	
     	paymentService.topUp(bob.getId(), "80");
+    	bob = (Client) paymentService.findClientByName("Bob");
     	assertEquals(new BigDecimal(80), bob.getBalance());
     	
     	paymentService.pay(bob.getId(), alice.getId(), "50");
-    	
-    
+    	 alice = (Client) paymentService.findClientByName("Alice");
+    	 bob = (Client) paymentService.findClientByName("Bob");
     	assertEquals(new BigDecimal(30), bob.getBalance());
     	assertEquals(new BigDecimal(150), alice.getBalance());
     	
     	paymentService.pay(bob.getId(), alice.getId(), "100");
+    	alice = (Client) paymentService.findClientByName("Alice");
+    	bob = (Client) paymentService.findClientByName("Bob");
     	assertEquals(new BigDecimal(0), bob.getBalance());
     	assertEquals(new BigDecimal(180), alice.getBalance());
     	
     	
     	paymentService.topUp(bob.getId(), "30");
+    	alice = (Client) paymentService.findClientByName("Alice");
+    	bob = (Client) paymentService.findClientByName("Bob");
     	assertEquals(new BigDecimal(0), bob.getBalance());
     	assertEquals(new BigDecimal(210), alice.getBalance());
     	
     	
     	paymentService.pay(alice.getId(), bob.getId(), "30");
+    	alice = (Client) paymentService.findClientByName("Alice");
+    	bob = (Client) paymentService.findClientByName("Bob");
     	assertEquals(new BigDecimal(0), bob.getBalance());
     	assertEquals(new BigDecimal(210), alice.getBalance());
     	
     	paymentService.topUp(bob.getId(), "100");
+    	alice = (Client) paymentService.findClientByName("Alice");
+    	bob = (Client) paymentService.findClientByName("Bob");
     	assertEquals(new BigDecimal(90), bob.getBalance());
     	assertEquals(new BigDecimal(220), alice.getBalance());
     }
