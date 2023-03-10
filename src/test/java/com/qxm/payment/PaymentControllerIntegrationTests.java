@@ -142,5 +142,41 @@ public class PaymentControllerIntegrationTests {
 		assertNotNull(balance3);
 		//assertEquals(new BigDecimal(100), balance3);
 		assertEquals("100",(String)response3.get("balance"));
+		
+		
+	    String requestBody1 = "80";
+		
+        //===============================================
+		HttpHeaders headers1 = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity1 = new HttpEntity<>(requestBody1, headers);
+
+		ResponseEntity<Map> responseE1 = restTemplate.exchange("http://localhost:" + port + "/v1/payment/"+ id1 +"/topup",
+				HttpMethod.PATCH, entity1, Map.class, Collections.EMPTY_MAP);
+
+		assertNotNull(responseE1);
+
+		// Should return NO_CONTENT (status code 204)
+		assertEquals(HttpStatus.NO_CONTENT, responseE1.getStatusCode());
+		
+		Map<String, Object> response4 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/mike",
+				Map.class);
+
+		assertNotNull(response4);
+
+		// Asserting API Response
+		Long id4 = (Long) response4.get("id");
+		assertNotNull(id4);
+		assertEquals(id1, id4);
+		
+		String name4 = (String) response4.get("name");
+		assertNotNull(name4);
+		assertEquals("mike", name4);
+		
+		BigDecimal balance4 = new BigDecimal((String)response4.get("balance"));
+		assertNotNull(balance4);
+		//assertEquals(new BigDecimal(100), balance3);
+		assertEquals("80",(String)response4.get("balance"));
+		
 	}
 }
