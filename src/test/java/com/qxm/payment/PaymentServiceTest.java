@@ -13,6 +13,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 public class PaymentServiceTest extends TestCase {
+	private ClientRepository clientRepository = new InMemClientRepository();
+	private PaymentService paymentService =  new PaymentServiceImpl(clientRepository);
 	
     /**
      * Create the test case
@@ -34,8 +36,7 @@ public class PaymentServiceTest extends TestCase {
     
     public void testCreateClient() throws Exception
     {
-    	ClientRepository clientRepository = new InMemClientRepository();
-    	PaymentService paymentService =  new PaymentServiceImpl(clientRepository);
+    	
     	Client alice = (Client) paymentService.findClientByName("Alice");
     	assertEquals(null, alice);
     	alice = (Client) paymentService.createClient("Alice");
@@ -51,8 +52,9 @@ public class PaymentServiceTest extends TestCase {
     	assertEquals(new BigDecimal(0), bob.getBalance());
     	
     	paymentService.topUp(alice.getId(), "100");
-    	alice = (Client) paymentService.findClientByName("Alice");
-    	assertEquals(new BigDecimal(100), alice.getBalance());
+    	Client alice1 = (Client) paymentService.findClientByName("Alice");
+    	assertEquals(new BigDecimal(100), alice1.getBalance());
+    	assertEquals(alice.getId(), alice1.getId());
     	
     	paymentService.topUp(bob.getId(), "80");
     	assertEquals(new BigDecimal(80), bob.getBalance());

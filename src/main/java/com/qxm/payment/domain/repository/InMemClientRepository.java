@@ -14,7 +14,10 @@ import com.qxm.payment.domain.model.entity.Payment;
 
 @Repository("clientrepository")
 public class InMemClientRepository implements ClientRepository {
-	private Map<Long, Client> entities = new HashMap<>();;
+	private Map<Long, Client> entities;
+	public InMemClientRepository () {
+		entities = new HashMap<>();
+	}
 	@Override
 	public Client get(Long id) {
 		return entities.get(id);
@@ -51,7 +54,7 @@ public class InMemClientRepository implements ClientRepository {
 	@Override
 	public Client findClientByName(String name) {
 		for (Client client: entities.values()) {
-			if (client.getName() == name) return client;
+			if (client.getName().equals(name)) return client;
 		}
 		return null;
 	}
