@@ -32,7 +32,7 @@ public class PaymentServiceImpl extends BaseService<Client, Long> implements Pay
 
 	@Override
 	public void add(Client client) throws Exception {
-		// TODO Auto-generated method stub
+		clientRepository.add(client);
 		
 	}
 

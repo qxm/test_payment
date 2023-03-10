@@ -1,6 +1,8 @@
 package com.qxm.payment.resources;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,18 +54,28 @@ public class PaymentController {
 	 */
 	@RequestMapping(value = "/login/{name}", method = RequestMethod.GET)
     public ResponseEntity<?> findById(@PathVariable("name") String name) {
-        logger.info(String.format("payment service findClientByName() invoked:%s for %s ", paymentService.getClass().getName(), name));
-        BaseEntity<?> client;
+        logger.info(String.format("payment service findClientByName() invoked:%s for %s", paymentService.getClass().getName(), name));
+        BaseEntity<?> entity;
+        Map<String, Object> map = new HashMap();
         try {
-            client = paymentService.findClientByName(name);
-            if (client == null) {
-            	client = paymentService.createClient(name);
+        	entity = paymentService.findClientByName(name);
+            if (entity == null) {
+            	entity = paymentService.createClient(name);
             }
+            if (entity != null) {
+               Client client = (Client)entity;
+               map.put("id", client.getId());
+               map.put("name", client.getName());
+               map.put("balance", client.getBalance().toString());
+               logger.info(String.format("payment service findClientByName() get id: %s balance: %s", entity.getId(), client.getBalance().toString()));
+               
+            }
+            
         } catch (Exception ex) {
             logger.log(Level.WARNING, "Exception raised findByClientName REST Call {0}", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return client != null ? new ResponseEntity<>(client, HttpStatus.OK)
+        return entity != null ? new ResponseEntity<>(map, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 	
@@ -77,7 +89,8 @@ public class PaymentController {
 	@PatchMapping("/{id}/topup")
 	public ResponseEntity<?> topUp(
 	  @RequestBody String amount, @PathVariable("id") Long id) {
-	     
+		logger.info(String.format("payment service topup invoked:%s id:%d amount: %s ", paymentService.getClass().getName(), id, amount));
+		  
 	    try {
 			paymentService.topUp(id, amount);
 		} catch (Exception ex) {
