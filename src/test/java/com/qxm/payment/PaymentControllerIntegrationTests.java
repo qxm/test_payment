@@ -212,5 +212,22 @@ public class PaymentControllerIntegrationTests {
 			//assertEquals(new BigDecimal(100), balance3);
 			assertEquals("30",(String)response5.get("balance"));
 		
+			Map<String, Object> response6 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
+					Map.class);
+
+			assertNotNull(response6);
+			// Asserting API Response
+			Long id6 = (Long) response6.get("id");
+			assertNotNull(id6);
+			assertEquals(id, id6);
+			
+			String name6 = (String) response6.get("name");
+			assertNotNull(name6);
+			assertEquals("jack", name6);
+			
+			BigDecimal balance6 = new BigDecimal((String)response5.get("balance"));
+			assertNotNull(balance6);
+			//assertEquals(new BigDecimal(100), balance3);
+			assertEquals("150",(String)response6.get("balance"));
 	}
 }
