@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PaymentControllerIntegrationTests {
+public class PaymentControllerIntegrationTest {
 
 	@LocalServerPort
 	private int port;
