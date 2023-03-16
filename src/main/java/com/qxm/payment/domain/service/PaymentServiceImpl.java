@@ -94,8 +94,10 @@ public class PaymentServiceImpl implements PaymentService {
 	    	if (received.compareTo(new BigDecimal("0.00"))>0 && to.getPayments().size()>0) {
 	    		processPendingPayment(to);
 	    	}
+	    	clientRepository.save(to);
 		}
 		client.setPayments(results);
+		
 		
 	}
 
@@ -104,13 +106,10 @@ public class PaymentServiceImpl implements PaymentService {
 		Client from = payment.getPayFrom();
 		Client to = payment.getTo();
 		
-	
-		
 	    if (from != null && to != null) {
 	    	from.addPayment(payment);
 	    	processPendingPayment(from);
 	    	clientRepository.save(from);
-	    	clientRepository.save(to);
 	    }
 		
 	}
