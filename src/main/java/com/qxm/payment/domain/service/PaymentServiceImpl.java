@@ -3,6 +3,7 @@ package com.qxm.payment.domain.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 	@Override
-	public Client findClientByName(String name) throws Exception {
+	public List<Client> findClientByName(String name) throws Exception {
 		return clientRepository.findByName(name);
 	}
 	
@@ -60,9 +61,10 @@ public class PaymentServiceImpl implements PaymentService {
 		Client client =clientRepository.findById(id).get();
 	    if (client != null) {
 	    	client.setBalance(client.getBalance().add(amount));
-	    	if (amount.compareTo(new BigDecimal(0))>0 && client.getPayments().size()>0) {
+	    	if (amount.compareTo(new BigDecimal("0.00"))>0 && client.getPayments().size()>0) {
 	    		processPendingPayment(client);
 	    	}
+	    	clientRepository.save(client);
 	    }
 	}
 	
@@ -72,11 +74,11 @@ public class PaymentServiceImpl implements PaymentService {
 		client.setPayments(new ArrayList<>());
 		for (Payment payment: processList) {
 		
-			Client from = payment.getFrom();
+			Client from = payment.getPayFrom();
 			Client to = payment.getTo();
 			BigDecimal amount = payment.getAmount();
 			BigDecimal balance = from.getBalance();
-			BigDecimal received = new BigDecimal(0);
+			BigDecimal received = new BigDecimal("0.00");
 	    	if (balance.compareTo(amount) >=0) {
 	    	  from.setBalance(from.getBalance().subtract(amount));
 	    	  to.setBalance(to.getBalance().add(amount));
@@ -84,23 +86,22 @@ public class PaymentServiceImpl implements PaymentService {
 	    	} else {
 	    		from.setBalance(new BigDecimal(0));
 		    	to.setBalance(to.getBalance().add(balance));
-		    	Payment remain = new Payment(payment.getFrom(), payment.getTo(), payment.getAmount().subtract(balance));
+		    	Payment remain = new Payment(payment.getPayFrom(), payment.getTo(), payment.getAmount().subtract(balance));
 		    	
 		    	results.add(remain);
 		    	received = balance;
 	    	}
-	    	if (received.compareTo(new BigDecimal(0))>0 && to.getPayments().size()>0) {
+	    	if (received.compareTo(new BigDecimal("0.00"))>0 && to.getPayments().size()>0) {
 	    		processPendingPayment(to);
 	    	}
 		}
 		client.setPayments(results);
 		
-		
 	}
 
 
 	private void pay(Payment payment) {
-		Client from = payment.getFrom();
+		Client from = payment.getPayFrom();
 		Client to = payment.getTo();
 		
 	
@@ -108,6 +109,8 @@ public class PaymentServiceImpl implements PaymentService {
 	    if (from != null && to != null) {
 	    	from.addPayment(payment);
 	    	processPendingPayment(from);
+	    	clientRepository.save(from);
+	    	clientRepository.save(to);
 	    }
 		
 	}

@@ -18,8 +18,11 @@ public class Client {
 	private String name;
 
 	private BigDecimal balance;
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="from")
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="payFrom")
 	private List<Payment> payments;
+	public Client() {
+		
+	}
 	public Client(String name, BigDecimal balance) {
 	    super();
 		this.setName(name);

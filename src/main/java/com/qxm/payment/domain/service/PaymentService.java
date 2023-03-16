@@ -1,4 +1,7 @@
 package com.qxm.payment.domain.service;
+import java.util.List;
+import java.util.Optional;
+
 import com.qxm.payment.domain.model.entity.Client;
 
 public interface PaymentService {
@@ -10,7 +13,7 @@ public interface PaymentService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Client findClientByName(String name) throws Exception;
+	public List<Client> findClientByName(String name) throws Exception;
 	
 	/**
 	 * 

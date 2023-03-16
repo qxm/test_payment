@@ -2,10 +2,12 @@ package com.qxm.payment.resources;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.util.Optional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,12 +56,14 @@ public class PaymentController {
 	@RequestMapping(value = "/login/{name}", method = RequestMethod.GET)
     public ResponseEntity<?> findById(@PathVariable("name") String name) {
         logger.info(String.format("payment service findClientByName() invoked:%s for %s", paymentService.getClass().getName(), name));
-        Client entity;
-        Map<String, Object> map = new HashMap();
+        Client entity = null;
+        Map<String, Object> map = new HashMap<String, Object>();
         try {
-        	entity = paymentService.findClientByName(name);
-            if (entity == null) {
+        	List<Client> result = paymentService.findClientByName(name);
+            if (result.size() == 0) {
             	entity = paymentService.createClient(name);
+            } else {
+            	entity = result.get(0);
             }
             if (entity != null) {
                Client client = (Client)entity;

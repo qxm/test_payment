@@ -17,16 +17,19 @@ public class Payment {
 	private long id;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="from")
-	private Client from;
+	@JoinColumn(name="payFrom")
+	private Client payFrom;
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="to")
 	private Client to;
 	private BigDecimal amount;
 
+	public Payment() {
+		
+	}
 	public Payment(Client from, Client to, BigDecimal amount) {
 		super();
-		setFrom(from);
+		setPayFrom(from);
 		setTo(to);
 		setAmount(amount);
 	}
@@ -40,12 +43,12 @@ public class Payment {
 	}
 
 
-	public Client getFrom() {
-		return from;
+	public Client getPayFrom() {
+		return payFrom;
 	}
 
-	public void setFrom(Client from) {
-		this.from = from;
+	public void setPayFrom(Client from) {
+		this.payFrom = from;
 	}
 
 	public Client getTo() {

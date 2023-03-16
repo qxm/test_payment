@@ -61,7 +61,7 @@ public class PaymentControllerIntegrationTest {
 		assertNotNull(response);
 
 		// Asserting API Response
-		Long id = (Long) response.get("id");
+		Long id = new Long((Integer) response.get("id"));
 		assertNotNull(id);
 		
 		String name = (String) response.get("name");
@@ -78,7 +78,7 @@ public class PaymentControllerIntegrationTest {
 		assertNotNull(response1);
 
 		// Asserting API Response
-		Long id1 = (Long) response1.get("id");
+		Long id1 = new Long((Integer)response1.get("id"));
 		assertNotNull(id1);
 		
 		String name1 = (String) response1.get("name");
@@ -95,7 +95,7 @@ public class PaymentControllerIntegrationTest {
 		assertNotNull(response2);
 
 		// Asserting API Response
-		Long id2 = (Long) response2.get("id");
+		Long id2 = new Long((Integer)response2.get("id"));
 		assertNotNull(id2);
 		assertEquals(id, id2);
 		
@@ -105,11 +105,11 @@ public class PaymentControllerIntegrationTest {
 		
 		BigDecimal balance2 = new BigDecimal ((String)response2.get("balance"));
 		assertNotNull(balance2);
-		assertEquals(new BigDecimal(0), balance2);
+		assertEquals(new BigDecimal("0.00"), balance2);
 		
 	
 	
-		String requestBody = "100";
+		String requestBody = "100.00";
 		
         //===============================================
 		HttpHeaders headers = new HttpHeaders();
@@ -130,7 +130,7 @@ public class PaymentControllerIntegrationTest {
 		assertNotNull(response3);
 
 		// Asserting API Response
-		Long id3 = (Long) response3.get("id");
+		Long id3 = new Long((Integer)response3.get("id"));
 		assertNotNull(id3);
 		assertEquals(id, id3);
 		
@@ -141,10 +141,10 @@ public class PaymentControllerIntegrationTest {
 		BigDecimal balance3 = new BigDecimal((String)response3.get("balance"));
 		assertNotNull(balance3);
 		//assertEquals(new BigDecimal(100), balance3);
-		assertEquals("100",(String)response3.get("balance"));
+		assertEquals("100.00",(String)response3.get("balance"));
 		
 		
-	    String requestBody1 = "80";
+	    String requestBody1 = "80.00";
 		
         //===============================================
 		HttpHeaders headers1 = new HttpHeaders();
@@ -165,7 +165,7 @@ public class PaymentControllerIntegrationTest {
 		assertNotNull(response4);
 
 		// Asserting API Response
-		Long id4 = (Long) response4.get("id");
+		Long id4 = new Long((Integer)response4.get("id"));
 		assertNotNull(id4);
 		assertEquals(id1, id4);
 		
@@ -176,10 +176,10 @@ public class PaymentControllerIntegrationTest {
 		BigDecimal balance4 = new BigDecimal((String)response4.get("balance"));
 		assertNotNull(balance4);
 		//assertEquals(new BigDecimal(100), balance3);
-		assertEquals("80",(String)response4.get("balance"));
+		assertEquals("80.00",(String)response4.get("balance"));
 		
 		//======================================
-		 String requestBody2 = "50";
+		 String requestBody2 = "50.00";
 			
 	        
 			HttpHeaders headers2 = new HttpHeaders();
@@ -199,7 +199,7 @@ public class PaymentControllerIntegrationTest {
 
 			assertNotNull(response5);
 			// Asserting API Response
-			Long id5 = (Long) response4.get("id");
+			Long id5 = new Long((Integer)response5.get("id"));
 			assertNotNull(id5);
 			assertEquals(id1, id5);
 			
@@ -210,14 +210,14 @@ public class PaymentControllerIntegrationTest {
 			BigDecimal balance5 = new BigDecimal((String)response5.get("balance"));
 			assertNotNull(balance5);
 			//assertEquals(new BigDecimal(100), balance3);
-			assertEquals("30",(String)response5.get("balance"));
+			assertEquals("30.00",(String)response5.get("balance"));
 		
 			Map<String, Object> response6 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
 					Map.class);
 
 			assertNotNull(response6);
 			// Asserting API Response
-			Long id6 = (Long) response6.get("id");
+			Long id6 = new Long((Integer)response6.get("id"));
 			assertNotNull(id6);
 			assertEquals(id, id6);
 			
@@ -228,6 +228,6 @@ public class PaymentControllerIntegrationTest {
 			BigDecimal balance6 = new BigDecimal((String)response5.get("balance"));
 			assertNotNull(balance6);
 			//assertEquals(new BigDecimal(100), balance3);
-			assertEquals("150",(String)response6.get("balance"));
+			assertEquals("150.00",(String)response6.get("balance"));
 	}
 }
