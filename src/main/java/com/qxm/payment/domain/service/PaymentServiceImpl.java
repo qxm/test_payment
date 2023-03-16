@@ -1,11 +1,12 @@
 package com.qxm.payment.domain.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.qxm.payment.domain.model.entity.BaseEntity;
 import com.qxm.payment.domain.model.entity.Client;
 import com.qxm.payment.domain.model.entity.Payment;
 import com.qxm.payment.domain.repository.ClientRepository;
@@ -16,7 +17,7 @@ import com.qxm.payment.domain.repository.ClientRepository;
  *
  */
 @Service("paymentService")
-public class PaymentServiceImpl extends BaseService<Client, Long> implements PaymentService {
+public class PaymentServiceImpl implements PaymentService {
 	private ClientRepository clientRepository;
 	
 	/**
@@ -26,52 +27,88 @@ public class PaymentServiceImpl extends BaseService<Client, Long> implements Pay
 	@Autowired
 	public
 	PaymentServiceImpl(ClientRepository repository) {
-		super(repository);
 		this.clientRepository = repository;
 	}
 
-	@Override
-	public void add(Client client) throws Exception {
-		clientRepository.add(client);
-		
-	}
 
 	@Override
-	public void update(Client client) throws Exception {
-		clientRepository.update(client);
-		
-	}
-
-	@Override
-	public void delete(Long id) throws Exception {
-		clientRepository.remove(id);
-		
-	}
-
-	@Override
-	public BaseEntity<?> findById(Long id) throws Exception {
-		return clientRepository.get(id);
-	}
-
-
-	@Override
-	public BaseEntity<?> findClientByName(String name) throws Exception {
-		return clientRepository.findClientByName(name);
+	public Client findClientByName(String name) throws Exception {
+		return clientRepository.findByName(name);
 	}
 	
 	@Override
-	public BaseEntity<?> createClient(String name) throws Exception {
-		Client  client = new Client(System.currentTimeMillis()+1001L, name, new BigDecimal(0));
-		clientRepository.add(client);
+	public Client createClient(String name) throws Exception {
+		Client  client = new Client(name, new BigDecimal(0));
+		clientRepository.save(client);
 		return client;
 	}
 	
 	public void topUp(Long id, String amount)  throws Exception {
-		clientRepository.topUp(id, new BigDecimal(amount));
+		topUp(id, new BigDecimal(amount));
 	}
 	
-	public void pay(Long from, Long to, String amount)  throws Exception {
-		Payment payment = new Payment(System.currentTimeMillis(), from, to, new BigDecimal(amount));
-		clientRepository.pay(payment);
+	public void pay(Long fromId, Long toId, String amount)  throws Exception {
+		Client from = clientRepository.findById(fromId).get();
+		Client to = clientRepository.findById(toId).get();
+		Payment payment = new Payment(from, to, new BigDecimal(amount));
+		pay(payment);
+	}
+
+
+	
+	private void topUp(Long id, BigDecimal amount) {
+		Client client =clientRepository.findById(id).get();
+	    if (client != null) {
+	    	client.setBalance(client.getBalance().add(amount));
+	    	if (amount.compareTo(new BigDecimal(0))>0 && client.getPayments().size()>0) {
+	    		processPendingPayment(client);
+	    	}
+	    }
+	}
+	
+	private void processPendingPayment(Client client) {
+		List<Payment> results = new ArrayList<>();
+		List<Payment> processList = client.getPayments();
+		client.setPayments(new ArrayList<>());
+		for (Payment payment: processList) {
+		
+			Client from = payment.getFrom();
+			Client to = payment.getTo();
+			BigDecimal amount = payment.getAmount();
+			BigDecimal balance = from.getBalance();
+			BigDecimal received = new BigDecimal(0);
+	    	if (balance.compareTo(amount) >=0) {
+	    	  from.setBalance(from.getBalance().subtract(amount));
+	    	  to.setBalance(to.getBalance().add(amount));
+	    	  received = amount;
+	    	} else {
+	    		from.setBalance(new BigDecimal(0));
+		    	to.setBalance(to.getBalance().add(balance));
+		    	Payment remain = new Payment(payment.getFrom(), payment.getTo(), payment.getAmount().subtract(balance));
+		    	
+		    	results.add(remain);
+		    	received = balance;
+	    	}
+	    	if (received.compareTo(new BigDecimal(0))>0 && to.getPayments().size()>0) {
+	    		processPendingPayment(to);
+	    	}
+		}
+		client.setPayments(results);
+		
+		
+	}
+
+
+	private void pay(Payment payment) {
+		Client from = payment.getFrom();
+		Client to = payment.getTo();
+		
+	
+		
+	    if (from != null && to != null) {
+	    	from.addPayment(payment);
+	    	processPendingPayment(from);
+	    }
+		
 	}
 }

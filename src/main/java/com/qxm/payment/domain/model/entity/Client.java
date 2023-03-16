@@ -1,19 +1,39 @@
 package com.qxm.payment.domain.model.entity;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-public class Client extends BaseEntity<Long> {
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+@Entity
+public class Client {
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private long id;
 	private String name;
 
 	private BigDecimal balance;
-	private List<Payment> payments = new ArrayList<>();
-	public Client(Long id, String name, BigDecimal balance) {
-		super(id);
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="from")
+	private List<Payment> payments;
+	public Client(String name, BigDecimal balance) {
+	    super();
 		this.setName(name);
 		this.setBalance(balance);
 	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
 
 	public String getName() {
 		return name;

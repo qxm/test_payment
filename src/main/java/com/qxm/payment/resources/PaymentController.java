@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qxm.payment.domain.model.entity.BaseEntity;
 import com.qxm.payment.domain.model.entity.Client;
 import com.qxm.payment.domain.service.PaymentService;
 
@@ -55,7 +54,7 @@ public class PaymentController {
 	@RequestMapping(value = "/login/{name}", method = RequestMethod.GET)
     public ResponseEntity<?> findById(@PathVariable("name") String name) {
         logger.info(String.format("payment service findClientByName() invoked:%s for %s", paymentService.getClass().getName(), name));
-        BaseEntity<?> entity;
+        Client entity;
         Map<String, Object> map = new HashMap();
         try {
         	entity = paymentService.findClientByName(name);
