@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.qxm.payment.domain.model.entity.Client;
 import com.qxm.payment.domain.model.entity.Payment;
 import com.qxm.payment.domain.repository.ClientRepository;
+import com.qxm.payment.domain.repository.PaymentRepository;
 
 /**
  * 
@@ -20,6 +21,8 @@ import com.qxm.payment.domain.repository.ClientRepository;
 @Service("paymentService")
 public class PaymentServiceImpl implements PaymentService {
 	private ClientRepository clientRepository;
+	@Autowired
+	private PaymentRepository paymentRepository;
 	
 	/**
 	 * 
@@ -39,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	@Override
 	public Client createClient(String name) throws Exception {
-		Client  client = new Client(name, new BigDecimal(0));
+		Client  client = new Client(name, new BigDecimal("0.00"));
 		clientRepository.save(client);
 		return client;
 	}
@@ -84,10 +87,9 @@ public class PaymentServiceImpl implements PaymentService {
 	    	  to.setBalance(to.getBalance().add(amount));
 	    	  received = amount;
 	    	} else {
-	    		from.setBalance(new BigDecimal(0));
+	    		from.setBalance(new BigDecimal("0.00"));
 		    	to.setBalance(to.getBalance().add(balance));
 		    	Payment remain = new Payment(payment.getPayFrom(), payment.getTo(), payment.getAmount().subtract(balance));
-		    	
 		    	results.add(remain);
 		    	received = balance;
 	    	}

@@ -1,10 +1,12 @@
 package com.qxm.payment.domain.model.entity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,7 +20,7 @@ public class Client {
 	private String name;
 
 	private BigDecimal balance;
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="payFrom")
+	@OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="payFrom")
 	private List<Payment> payments;
 	public Client() {
 		

@@ -70,7 +70,7 @@ public class PaymentControllerIntegrationTest {
 		
 		BigDecimal balance = new BigDecimal ((String)response.get("balance"));
 		assertNotNull(balance);
-		assertEquals(new BigDecimal(0), balance);
+		assertEquals(new BigDecimal("0.00"), balance);
 		
 		Map<String, Object> response1 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/mike",
 				Map.class);
@@ -87,7 +87,7 @@ public class PaymentControllerIntegrationTest {
 		
 		BigDecimal balance1 = new BigDecimal ((String)response1.get("balance"));
 		assertNotNull(balance1);
-		assertEquals(new BigDecimal(0), balance1);
+		assertEquals(new BigDecimal("0.00"), balance1);
 		
 		Map<String, Object> response2 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
 				Map.class);

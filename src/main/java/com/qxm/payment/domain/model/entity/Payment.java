@@ -19,7 +19,7 @@ public class Payment {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="payFrom")
 	private Client payFrom;
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="to")
 	private Client to;
 	private BigDecimal amount;
