@@ -2,8 +2,10 @@ package com.qxm.payment.domain.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,8 +56,33 @@ public class PaymentServiceImpl implements PaymentService {
 	public void pay(Long fromId, Long toId, String amount)  throws Exception {
 		Client from = clientRepository.findById(fromId).get();
 		Client to = clientRepository.findById(toId).get();
-		Payment payment = new Payment(from, to, new BigDecimal(amount));
-		pay(payment);
+		Payment found = null;
+		for (Payment payment: to.getPayments()) {
+			if (payment.getTo().getId() == from.getId()) {
+				found = payment;
+				break;
+			}
+		}
+		BigDecimal payAmount = new BigDecimal(amount);
+		if (found == null) {
+			preparePay(new Payment(from, to, payAmount));
+		
+		    clientRepository.save(from);
+		} else {
+			BigDecimal tranferAmount = payAmount.subtract(found.getAmount());
+			if (tranferAmount.compareTo(new BigDecimal("0.00"))<0) {
+				found.setAmount(found.getAmount().subtract(payAmount));
+				paymentRepository.save(found);
+				clientRepository.save(to);
+			} else {
+				to.getPayments().remove(found);
+				paymentRepository.delete(found);
+				Payment payment = new Payment(from, to, tranferAmount);
+				pay(payment);
+				clientRepository.save(from);
+				clientRepository.save(to);
+			}
+		}
 	}
 
 
@@ -67,38 +94,20 @@ public class PaymentServiceImpl implements PaymentService {
 	    	if (amount.compareTo(new BigDecimal("0.00"))>0 && client.getPayments().size()>0) {
 	    		processPendingPayment(client);
 	    	}
+	    	
 	    	clientRepository.save(client);
 	    }
 	}
 	
 	private void processPendingPayment(Client client) {
-		List<Payment> results = new ArrayList<>();
-		List<Payment> processList = client.getPayments();
-		client.setPayments(new ArrayList<>());
-		for (Payment payment: processList) {
-		
-			Client from = payment.getPayFrom();
-			Client to = payment.getTo();
-			BigDecimal amount = payment.getAmount();
-			BigDecimal balance = from.getBalance();
-			BigDecimal received = new BigDecimal("0.00");
-	    	if (balance.compareTo(amount) >=0) {
-	    	  from.setBalance(from.getBalance().subtract(amount));
-	    	  to.setBalance(to.getBalance().add(amount));
-	    	  received = amount;
-	    	} else {
-	    		from.setBalance(new BigDecimal("0.00"));
-		    	to.setBalance(to.getBalance().add(balance));
-		    	Payment remain = new Payment(payment.getPayFrom(), payment.getTo(), payment.getAmount().subtract(balance));
-		    	results.add(remain);
-		    	received = balance;
-	    	}
-	    	if (received.compareTo(new BigDecimal("0.00"))>0 && to.getPayments().size()>0) {
-	    		processPendingPayment(to);
-	    	}
-	    	clientRepository.save(to);
+
+		Set<Payment> processList = client.getPayments();
+		client.setPayments(new HashSet<>());
+	   	for (Payment payment: processList) {
+			
+			pay(payment);
+			
 		}
-		client.setPayments(results);
 		
 		
 	}
@@ -107,12 +116,44 @@ public class PaymentServiceImpl implements PaymentService {
 	private void pay(Payment payment) {
 		Client from = payment.getPayFrom();
 		Client to = payment.getTo();
-		
-	    if (from != null && to != null) {
-	    	from.addPayment(payment);
-	    	processPendingPayment(from);
-	    	clientRepository.save(from);
-	    }
-		
+		BigDecimal amount = payment.getAmount();
+		BigDecimal balance = from.getBalance();
+    	if (balance.compareTo(amount) >=0) {
+	    	  from.setBalance(from.getBalance().subtract(amount));
+	    	  to.setBalance(to.getBalance().add(amount));
+	    	  
+	    	} else {
+	    		from.setBalance(new BigDecimal("0.00"));
+		    	to.setBalance(to.getBalance().add(balance));
+		    	payment.setAmount(payment.getAmount().subtract(balance));
+		    	
+		    	from.addPayment(payment);
+		 
+	    	}
+    	clientRepository.save(to);
+	}
+	
+	private void preparePay(Payment payment1) {
+		Client from = payment1.getPayFrom();
+		Client to = payment1.getTo();
+		Payment found1 = null;
+		Payment payment = new Payment(from, to, payment1.getAmount());
+		for (Payment item: from.getPayments()) {
+			if (item.getTo().getId() == to.getId()) {
+				found1 = item;
+				break;
+			}
+		}
+		if (found1 != null) {
+	        from.getPayments().remove(found1);
+			paymentRepository.delete(found1);
+			payment = new Payment(from, to, payment1.getAmount().add(found1.getAmount()));
+		}
+	    
+	    	
+		  pay(payment);
+	    	
+	    	
+	    	
 	}
 }

@@ -3,6 +3,7 @@ package com.qxm.payment.domain.model.entity;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -21,7 +22,8 @@ public class Client {
 
 	private BigDecimal balance;
 	@OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="payFrom")
-	private List<Payment> payments;
+	private Set<Payment> payments;
+	
 	public Client() {
 		
 	}
@@ -56,15 +58,16 @@ public class Client {
 		this.balance = balance;
 	}
 
-	public List<Payment> getPayments() {
+	public Set<Payment> getPayments() {
 		return payments;
 	}
 
-	public void setPayments(List<Payment> payments) {
+	public void setPayments(Set<Payment> payments) {
 		this.payments = payments;
 	}
 	
 	public void addPayment(Payment payment) {
+	
 		payments.add(payment);
 	}
 	

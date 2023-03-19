@@ -62,6 +62,7 @@ public class PaymentServiceTest {
     	paymentService.pay(bob.getId(), alice.getId(), "100.00");
     	alice = paymentService.findClientByName("Alice").get(0);
     	bob = paymentService.findClientByName("Bob").get(0);
+    	//System.out.println("------------------bob balance before:"+bob.getBalance()+"paymentsize:"+ bob.getPayments().size());
     	assertEquals(new BigDecimal("0.00"), bob.getBalance());
     	assertEquals(new BigDecimal("180.00"), alice.getBalance());
     	
@@ -69,6 +70,8 @@ public class PaymentServiceTest {
     	paymentService.topUp(bob.getId(), "30.00");
     	alice = paymentService.findClientByName("Alice").get(0);
     	bob = paymentService.findClientByName("Bob").get(0);
+    	//System.out.println("------------------bob balance before:"+bob.getBalance()+"paymentsize:"+ bob.getPayments().size());
+       
     	assertEquals(new BigDecimal("0.00"), bob.getBalance());
     	assertEquals(new BigDecimal("210.00"), alice.getBalance());
     	
@@ -79,7 +82,9 @@ public class PaymentServiceTest {
     	assertEquals(new BigDecimal("0.00"), bob.getBalance());
     	assertEquals(new BigDecimal("210.00"), alice.getBalance());
     	
+    	//System.out.println("------------------bob balance before:"+bob.getBalance()+"paymentsize:"+ bob.getPayments().size());
     	paymentService.topUp(bob.getId(), "100.00");
+    	//System.out.println("------------------bob balance after:"+bob.getBalance());
     	alice = paymentService.findClientByName("Alice").get(0);
     	bob = paymentService.findClientByName("Bob").get(0);
     	assertEquals(new BigDecimal("90.00"), bob.getBalance());

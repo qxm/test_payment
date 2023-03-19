@@ -2,6 +2,7 @@ package com.qxm.payment.domain.model.entity;
 
 import java.math.BigDecimal;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -16,7 +17,7 @@ public class Payment {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="payFrom")
 	private Client payFrom;
 	@ManyToOne(fetch=FetchType.EAGER)
