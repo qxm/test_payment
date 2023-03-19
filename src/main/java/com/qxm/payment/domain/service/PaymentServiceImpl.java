@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +55,7 @@ public class PaymentServiceImpl implements PaymentService {
 		topUp(id, new BigDecimal(amount));
 	}
 	
+	@Transactional
 	public void pay(Long fromId, Long toId, String amount)  throws Exception {
 		Client from = clientRepository.findById(fromId).get();
 		Client to = clientRepository.findById(toId).get();
@@ -86,7 +89,7 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 
-	
+	@Transactional
 	private void topUp(Long id, BigDecimal amount) {
 		Client client =clientRepository.findById(id).get();
 	    if (client != null) {
