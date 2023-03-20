@@ -1,5 +1,6 @@
 package com.qxm.payment.domain.model.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -21,7 +22,7 @@ public class User {
 	@Column(nullable=false)
 	private String password;
 	
-	@OneToOne(mappedBy="user", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToOne(mappedBy="user", fetch = FetchType.LAZY, cascade=CascadeType.ALL, orphanRemoval = true)
 	private Client client;
 	
 	public User() {

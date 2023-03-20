@@ -1,6 +1,7 @@
 package com.qxm.payment.resources;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +11,12 @@ import java.util.logging.Logger;
 import java.util.Optional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +26,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qxm.payment.domain.AccountCredentials;
 import com.qxm.payment.domain.model.entity.Client;
+import com.qxm.payment.domain.service.JwtService;
 import com.qxm.payment.domain.service.PaymentService;
+
+import io.jsonwebtoken.lang.Collections;
 
 /**
  * 
@@ -39,6 +48,12 @@ public class PaymentController {
 
 	protected PaymentService paymentService;
 	
+	@Autowired
+	private JwtService jwtService;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
 	/**
 	 * 
 	 * @param paymentService
@@ -48,13 +63,30 @@ public class PaymentController {
 		this.paymentService = paymentService;
 	}
 	
+	
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public ResponseEntity<?> getToken(@RequestBody AccountCredentials credentials) {
+		UsernamePasswordAuthenticationToken creds =
+				new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword(), new ArrayList());
+		 logger.info(String.format("payment service login() invoked:%s for %s", credentials.getUsername(), credentials.getPassword()));
+		Authentication auth = authenticationManager.authenticate(creds);
+		String jwts = jwtService.getToken(auth.getName());
+		logger.info(String.format("auth name:%s jwt: %s", auth.getName(), jwts));
+		
+		return ResponseEntity.ok()
+				.header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
+				.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
+				.build();
+	}
+	
+	
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping(value = "/login/{name}", method = RequestMethod.GET)
-    public ResponseEntity<?> findById(@PathVariable("name") String name) {
+	@RequestMapping(value = "/find/{name}", method = RequestMethod.GET)
+    public ResponseEntity<?> findByName(@PathVariable("name") String name) {
         logger.info(String.format("payment service findClientByName() invoked:%s for %s", paymentService.getClass().getName(), name));
         Client entity = null;
         Map<String, Object> map = new HashMap<String, Object>();
