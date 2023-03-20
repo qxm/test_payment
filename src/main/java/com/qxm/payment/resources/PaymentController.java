@@ -59,11 +59,11 @@ public class PaymentController {
         Client entity = null;
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-        	List<Client> result = paymentService.findClientByName(name);
-            if (result.size() == 0) {
+        	Optional<Client> result = paymentService.findClientByName(name);
+            if (!result.isPresent()) {
             	entity = paymentService.createClient(name);
             } else {
-            	entity = result.get(0);
+            	entity = result.get();
             }
             if (entity != null) {
                Client client = (Client)entity;

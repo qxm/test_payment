@@ -40,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 	@Override
-	public List<Client> findClientByName(String name) throws Exception {
+	public Optional<Client> findClientByName(String name) throws Exception {
 		return clientRepository.findByName(name);
 	}
 	

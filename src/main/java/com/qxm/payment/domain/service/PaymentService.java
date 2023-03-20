@@ -13,7 +13,7 @@ public interface PaymentService {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Client> findClientByName(String name) throws Exception;
+	public Optional<Client> findClientByName(String name) throws Exception;
 	
 	/**
 	 * 
