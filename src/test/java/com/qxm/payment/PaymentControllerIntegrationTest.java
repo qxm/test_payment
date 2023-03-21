@@ -54,69 +54,74 @@ public class PaymentControllerIntegrationTest {
 	 */
 	@Test
 	public void testPayment() throws JsonProcessingException{
+		//-----------user jack login-----------------
+		Map<String, Object> cred = new HashMap<>();
+		cred.put("username", "jack");
+		cred.put("password", "user");
+		HttpHeaders headers_1 = new HttpHeaders();
+		headers_1.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity_1 = new HttpEntity<>(objectMapper.writeValueAsString(cred), headers_1);
+		
 		// API call
-		Map<String, Object> response = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
-				Map.class);
+		ResponseEntity<Map>  response =  restTemplate.exchange("http://localhost:" + port + "/v1/payment/login",
+						HttpMethod.POST, entity_1, Map.class, Collections.EMPTY_MAP);
+			
 
 		assertNotNull(response);
 
 		// Asserting API Response
-		Long id = new Long((Integer) response.get("id"));
-		assertNotNull(id);
+		String jwtToken = response.getHeaders().get("Authorization").get(0);
+		assertEquals(114, jwtToken.length());
+		//-----------------------user mike login--------------------------
 		
-		String name = (String) response.get("name");
-		assertNotNull(name);
-		assertEquals("jack", name);
+		Map<String, Object> cred1 = new HashMap<>();
+		cred1.put("username", "mike");
+		cred1.put("password", "admin");
+		HttpHeaders headers_2 = new HttpHeaders();
+		headers_2.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity_2 = new HttpEntity<>(objectMapper.writeValueAsString(cred1), headers_2);
 		
-		BigDecimal balance = new BigDecimal ((String)response.get("balance"));
-		assertNotNull(balance);
-		assertEquals(new BigDecimal("0.00"), balance);
+		// API call
+		ResponseEntity<Map>  response1 =  restTemplate.exchange("http://localhost:" + port + "/v1/payment/login",
+						HttpMethod.POST, entity_2, Map.class, Collections.EMPTY_MAP);
 		
-		Map<String, Object> response1 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/mike",
-				Map.class);
 
 		assertNotNull(response1);
 
 		// Asserting API Response
-		Long id1 = new Long((Integer)response1.get("id"));
-		assertNotNull(id1);
+		String jwtToken1 = response1.getHeaders().get("Authorization").get(0);
+		assertEquals(114, jwtToken1.length());
+//--------------------------user jack login-----------------------
+	
+		Map<String, Object> cred2 = new HashMap<>();
+		cred2.put("username", "jack");
+		cred2.put("password", "user");
+		HttpHeaders headers_3 = new HttpHeaders();
+		headers_3.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity_3 = new HttpEntity<>(objectMapper.writeValueAsString(cred2), headers_3);
 		
-		String name1 = (String) response1.get("name");
-		assertNotNull(name1);
-		assertEquals("mike", name1);
-		
-		BigDecimal balance1 = new BigDecimal ((String)response1.get("balance"));
-		assertNotNull(balance1);
-		assertEquals(new BigDecimal("0.00"), balance1);
-		
-		Map<String, Object> response2 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
-				Map.class);
+		// API call
+		ResponseEntity<Map>  response2 =  restTemplate.exchange("http://localhost:" + port + "/v1/payment/login",
+						HttpMethod.POST, entity_3, Map.class, Collections.EMPTY_MAP);
+				
 
-		assertNotNull(response2);
+		assertNotNull(response);
 
 		// Asserting API Response
-		Long id2 = new Long((Integer)response2.get("id"));
-		assertNotNull(id2);
-		assertEquals(id, id2);
+		String jwtToken2 = response2.getHeaders().get("Authorization").get(0);
+		assertEquals(114, jwtToken2.length());
 		
-		String name2 = (String) response2.get("name");
-		assertNotNull(name2);
-		assertEquals("jack", name2);
 		
-		BigDecimal balance2 = new BigDecimal ((String)response2.get("balance"));
-		assertNotNull(balance2);
-		assertEquals(new BigDecimal("0.00"), balance2);
 		
-	
-	
+        //=======================user jack top up 100========================
 		String requestBody = "100.00";
 		
-        //===============================================
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add("Authorization", jwtToken2);
 		HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
-		ResponseEntity<Map> responseE = restTemplate.exchange("http://localhost:" + port + "/v1/payment/"+ id +"/topup",
+		ResponseEntity<Map> responseE = restTemplate.exchange("http://localhost:" + port + "/v1/payment/topup",
 				HttpMethod.PATCH, entity, Map.class, Collections.EMPTY_MAP);
 
 		assertNotNull(responseE);
@@ -124,15 +129,21 @@ public class PaymentControllerIntegrationTest {
 		// Should return NO_CONTENT (status code 204)
 		assertEquals(HttpStatus.NO_CONTENT, responseE.getStatusCode());
 		
-		Map<String, Object> response3 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
-				Map.class);
-
+		//---------------------check jack balance-------------------------------------------
+		HttpHeaders headers_11 = new HttpHeaders();
+		//headers.setContentType(MediaType.APPLICATION_JSON);
+		headers_11.add("Authorization", jwtToken2);
+		HttpEntity<Void> entity_11 = new HttpEntity<>(headers_11);
+		ResponseEntity<Map<String, Object>> response_11 = restTemplate.exchange(
+				"http://localhost:" + port + "/v1/payment/client", HttpMethod.GET, entity_11, Map.class, Collections.EMPTY_MAP);
+		
+		Map<String, Object> response3 = response_11.getBody();
 		assertNotNull(response3);
 
 		// Asserting API Response
 		Long id3 = new Long((Integer)response3.get("id"));
 		assertNotNull(id3);
-		assertEquals(id, id3);
+		
 		
 		String name3 = (String) response3.get("name");
 		assertNotNull(name3);
@@ -143,15 +154,33 @@ public class PaymentControllerIntegrationTest {
 		//assertEquals(new BigDecimal(100), balance3);
 		assertEquals("100.00",(String)response3.get("balance"));
 		
+		//-------------------user mike login-----------------------------
+		Map<String, Object> cred_4 = new HashMap<>();
+		cred_4.put("username", "mike");
+		cred_4.put("password", "admin");
+		HttpHeaders headers_4 = new HttpHeaders();
+		headers_4.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity_4 = new HttpEntity<>(objectMapper.writeValueAsString(cred_4), headers_4);
 		
-	    String requestBody1 = "80.00";
-		
-        //===============================================
-		HttpHeaders headers1 = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> entity1 = new HttpEntity<>(requestBody1, headers);
+		// API call
+		ResponseEntity<Map>  response_4 =  restTemplate.exchange("http://localhost:" + port + "/v1/payment/login",
+						HttpMethod.POST, entity_4, Map.class, Collections.EMPTY_MAP);
+				
 
-		ResponseEntity<Map> responseE1 = restTemplate.exchange("http://localhost:" + port + "/v1/payment/"+ id1 +"/topup",
+		assertNotNull(response_4);
+
+		// Asserting API Response
+		String jwtToken_4 = response_4.getHeaders().get("Authorization").get(0);
+		assertEquals(114, jwtToken_4.length());
+		
+        //=====================mkie top up 80==========================
+		 String requestBody1 = "80.00";
+		HttpHeaders headers1 = new HttpHeaders();
+		headers1.setContentType(MediaType.APPLICATION_JSON);
+		headers1.add("Authorization", jwtToken_4);
+		HttpEntity<String> entity1 = new HttpEntity<>(requestBody1, headers1);
+
+		ResponseEntity<Map> responseE1 = restTemplate.exchange("http://localhost:" + port + "/v1/payment/topup",
 				HttpMethod.PATCH, entity1, Map.class, Collections.EMPTY_MAP);
 
 		assertNotNull(responseE1);
@@ -159,15 +188,22 @@ public class PaymentControllerIntegrationTest {
 		// Should return NO_CONTENT (status code 204)
 		assertEquals(HttpStatus.NO_CONTENT, responseE1.getStatusCode());
 		
-		Map<String, Object> response4 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/mike",
-				Map.class);
+		//=================check mike balance========================================
+		HttpHeaders headers_12 = new HttpHeaders();
+		//headers.setContentType(MediaType.APPLICATION_JSON);
+		headers_12.add("Authorization", jwtToken_4);
+		HttpEntity<Void> entity_12 = new HttpEntity<>(headers_12);
+		ResponseEntity<Map<String, Object>> response_12 = restTemplate.exchange(
+				"http://localhost:" + port + "/v1/payment/client", HttpMethod.GET, entity_12, Map.class, Collections.EMPTY_MAP);
+		
+		Map<String, Object> response4 = response_12.getBody();
 
 		assertNotNull(response4);
 
 		// Asserting API Response
 		Long id4 = new Long((Integer)response4.get("id"));
 		assertNotNull(id4);
-		assertEquals(id1, id4);
+		
 		
 		String name4 = (String) response4.get("name");
 		assertNotNull(name4);
@@ -178,15 +214,16 @@ public class PaymentControllerIntegrationTest {
 		//assertEquals(new BigDecimal(100), balance3);
 		assertEquals("80.00",(String)response4.get("balance"));
 		
-		//======================================
+		//====================mike pay jack 50==================
 		 String requestBody2 = "50.00";
 			
 	        
 			HttpHeaders headers2 = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> entity2 = new HttpEntity<>(requestBody2, headers);
+			headers2.setContentType(MediaType.APPLICATION_JSON);
+			headers2.add("Authorization", jwtToken_4);
+			HttpEntity<String> entity2 = new HttpEntity<>(requestBody2, headers2);
 
-			ResponseEntity<Map> responseE2 = restTemplate.exchange("http://localhost:" + port + "/v1/payment/"+ id1 +"/pay/"+id,
+			ResponseEntity<Map> responseE2 = restTemplate.exchange("http://localhost:" + port + "/v1/payment/pay/"+"jack",
 					HttpMethod.PATCH, entity2, Map.class, Collections.EMPTY_MAP);
 
 			assertNotNull(responseE2);
@@ -194,14 +231,21 @@ public class PaymentControllerIntegrationTest {
 			// Should return NO_CONTENT (status code 204)
 			assertEquals(HttpStatus.NO_CONTENT, responseE2.getStatusCode());
 			
-			Map<String, Object> response5 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/mike",
-					Map.class);
+		//===============check mike balance===========================================
+			HttpHeaders headers_13 = new HttpHeaders();
+			//headers.setContentType(MediaType.APPLICATION_JSON);
+			headers_13.add("Authorization", jwtToken_4);
+			HttpEntity<Void> entity_13 = new HttpEntity<>(headers_13);
+			ResponseEntity<Map<String, Object>> response_13 = restTemplate.exchange(
+					"http://localhost:" + port + "/v1/payment/client", HttpMethod.GET, entity_13, Map.class, Collections.EMPTY_MAP);
+			
+			Map<String, Object> response5 = response_13.getBody();
 
 			assertNotNull(response5);
 			// Asserting API Response
 			Long id5 = new Long((Integer)response5.get("id"));
 			assertNotNull(id5);
-			assertEquals(id1, id5);
+			assertEquals(id4, id5);
 			
 			String name5 = (String) response4.get("name");
 			assertNotNull(name5);
@@ -212,14 +256,42 @@ public class PaymentControllerIntegrationTest {
 			//assertEquals(new BigDecimal(100), balance3);
 			assertEquals("30.00",(String)response5.get("balance"));
 		
-			Map<String, Object> response6 = restTemplate.getForObject("http://localhost:" + port + "/v1/payment/login/jack",
-					Map.class);
+			//--------------------------user jack login-----------------------
+			
+			Map<String, Object> cred3 = new HashMap<>();
+			cred3.put("username", "jack");
+			cred3.put("password", "user");
+			HttpHeaders headers_5 = new HttpHeaders();
+			headers_5.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity<String> entity_5 = new HttpEntity<>(objectMapper.writeValueAsString(cred3), headers_5);
+			
+			// API call
+			ResponseEntity<Map>  response_5 =  restTemplate.exchange("http://localhost:" + port + "/v1/payment/login",
+							HttpMethod.POST, entity_5, Map.class, Collections.EMPTY_MAP);
+			
+			assertNotNull(response_5);
+
+			// Asserting API Response
+			String jwtToken_5 = response_5.getHeaders().get("Authorization").get(0);
+			assertEquals(114, jwtToken_5.length());
+			
+			
+			//=====================check jack balance=======================================
+			HttpHeaders headers_14 = new HttpHeaders();
+			//headers.setContentType(MediaType.APPLICATION_JSON);
+			headers_14.add("Authorization", jwtToken_5);
+			HttpEntity<Void> entity_14 = new HttpEntity<>(headers_14);
+			ResponseEntity<Map<String, Object>> response_14 = restTemplate.exchange(
+					"http://localhost:" + port + "/v1/payment/client", HttpMethod.GET, entity_14, Map.class, Collections.EMPTY_MAP);
+			
+			Map<String, Object> response6 = response_14.getBody();
+		
 
 			assertNotNull(response6);
 			// Asserting API Response
 			Long id6 = new Long((Integer)response6.get("id"));
 			assertNotNull(id6);
-			assertEquals(id, id6);
+			assertEquals(id3, id6);
 			
 			String name6 = (String) response6.get("name");
 			assertNotNull(name6);

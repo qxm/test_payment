@@ -8,10 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -22,9 +23,10 @@ public class PaymentConrollerTest {
 	@Test
 	public void testLogin() throws Exception {
 		this.mockMvc
-		.perform(get("/v1/payment/login/jack")
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(jsonPath("$.name", is("jack")))
-		.andExpect(status().isOk());
+		.perform(post("/v1/payment/login")
+				.content("{\"username\":\"jack\", \"password\":\"user\"}")
+				.contentType(MediaType.APPLICATION_JSON))
+		.andDo(print()).andExpect(status().isOk());
 		
 	}
 	

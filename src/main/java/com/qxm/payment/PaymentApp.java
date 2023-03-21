@@ -24,9 +24,9 @@ public class PaymentApp  implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		userrepository.save(new User("user", 
+		userrepository.save(new User("jack", 
 				"$2a$10$NVM0n8ElaRgg7zWO1CxUdei7vWoPg91Lz2aYavh9.f9q0e4bRadue"));
-		userrepository.save(new User("admin", 
+		userrepository.save(new User("mike", 
 				"$2a$10$8cjz47bjbR4Mn8GMg9IZx.vyjhLXR/SKKMSZ9.mP9vpMu0ssKi8GW"));
 		
 	}
