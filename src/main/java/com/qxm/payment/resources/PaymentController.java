@@ -20,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.qxm.payment.domain.AccountCredentials;
 import com.qxm.payment.domain.model.entity.Client;
+import com.qxm.payment.domain.model.entity.User;
+import com.qxm.payment.domain.repository.UserRepository;
 import com.qxm.payment.domain.service.JwtService;
 import com.qxm.payment.domain.service.PaymentService;
 
@@ -48,6 +51,8 @@ public class PaymentController {
    protected static final Logger logger = Logger.getLogger(PaymentController.class.getName());
 
 	protected PaymentService paymentService;
+	@Autowired
+	private UserRepository userrepository;
 	
 	@Autowired
 	private JwtService jwtService;
@@ -65,7 +70,7 @@ public class PaymentController {
 	}
 	
 	
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	/*@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<?> getToken(@RequestBody AccountCredentials credentials) {
 		UsernamePasswordAuthenticationToken creds =
 				new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword(), Collections.emptyList());
@@ -78,9 +83,38 @@ public class PaymentController {
 				.header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
 				.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
 				.build();
+	}*/
+	
+	
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public ResponseEntity<?> register(@RequestBody AccountCredentials credentials) {
+		String name = credentials.getUsername();
+		try {
+			Optional<Client> result = paymentService.findClientByName(name);
+			if (!result.isPresent()) {
+				
+				String password = new BCryptPasswordEncoder().encode(credentials.getPassword());
+				userrepository.save(new User(name, password));
+			}
+			UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(
+					credentials.getUsername(), credentials.getPassword(), Collections.emptyList());
+			logger.info(String.format("payment service login() invoked:%s for %s", credentials.getUsername(),
+					credentials.getPassword()));
+			Authentication auth = authenticationManager.authenticate(creds);
+			String jwts = jwtService.getToken(auth.getName());
+			logger.info(String.format("auth name:%s jwt: %s", auth.getName(), jwts));
+
+			return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
+					.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization").build();
+		} catch (
+
+		Exception ex) {
+			logger.log(Level.WARNING, "Exception raised register REST Call {0}", ex);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
-	
-	
+
 	/**
 	 * 
 	 *
